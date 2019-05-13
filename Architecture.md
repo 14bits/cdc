@@ -31,9 +31,15 @@ Its 100% unidirectional in this order and so no side effects:
 		- https://www.cockroachlabs.com/docs/stable/change-data-capture.html
 	- MySQL and Postresql
 		- https://github.com/wal-g/wal-g
-  - MySQL and Postresql
-    - https://github.com/moiot/gravity
-    - this one is impressive, but uses Kafka. Easy to also use NATS i think.
+  	- MySQL and Postresql
+   		 - https://github.com/moiot/gravity
+    		- this one is impressive, but uses Kafka. Easy to also use NATS i think.
+	- other
+		https://github.com/JarvusInnovations/lapidus 
+			- has a nice API, works with MySQL and Postgres, it streams JSON of the whole payload of each WAL buffer
+			- is Nodejs so a bit yucky, but still...
+			- Pushs into NATS !
+
 
 - These events are CUD events per Table.
 - Each Legacy DB has its own Namespace so they do not clash.
