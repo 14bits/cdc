@@ -9,14 +9,8 @@ The basic theory:
 The DB is the write side and we "watch" for changes to them and feed the CUD ( Create, Update, Delete) events into NATS.
 Once you have this in place it is a very powerful pattern because you can keep all other GUI's and MicroServices up to Date since they subscribe to the Changes.
 
-We use this library:
-https://github.com/wal-g/wal-g
+See the Architecture Doc for more indepth info on the theory.
 
-
-Often you need to transforma the data also to your "common" Domain Mobel" or just for managing the DB changing but the Domain Model not changing. So you need a piped transformation engine. This is where Benthos can help.
-
-We use this library:
-https://github.com/Jeffail/benthos
 
 
 
