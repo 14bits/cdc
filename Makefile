@@ -148,7 +148,7 @@ gate-run: ### gate-run
 	# get laptops ip.
 	ifconfig | grep "inet " | grep -v 127.0.0.1
 
-	$(PWD)/bin/ngrok authtoken 
+	$(PWD)/bin/ngrok authtoken ???
 	#$(PWD)/bin/ngrok http 8000
 	$(PWD)/bin/ngrok http -subdomain=gedw99 $(GATE_PORT)
 
@@ -163,7 +163,7 @@ run:
 
 ### GRA 
 
-GRA_BIN=grabs
+GRA_BIN=gra
 
 gra-dep:	
 	# grabs dep
@@ -172,8 +172,13 @@ gra-dep:
 	# gets all deps.
 	cd $(GRA_LIB_FSPATH) && make deps
 	
+gra-build: ### gra-build
+	cd $(GRA_LIB_FSPATH) && GO111MODULE=on make build
+	mkdir -p $(PWD)/bin
+	cp $(GRA_LIB_FSPATH)/bin/$(GRA_LIB_NAME) $(PWD)/bin/$(GRA_BIN)
 
-
+gra-run: ### gra-run
+	$(PWD)/bin/$(GRA_BIN) -h
 ### WAL
 
 WAL_BIN=wal
