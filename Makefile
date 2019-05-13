@@ -5,6 +5,11 @@
 SHELL:=/bin/bash
 GO111MODULE=off
 
+# https://github.com/xo/usql
+USQL_LIB_NAME=usql
+USQL_LIB=github.com/xo/$(USQL_LIB_NAME)
+USQL_LIB_FSPATH=$(GOPATH)/src/$(USQL_LIB)
+
 # https://github.com/wal-g/wal-g
 WAL_LIB_NAME=wal-g
 WAL_LIB_BRANCH=master
@@ -12,6 +17,15 @@ WAL_LIB_TAG=v1.0.0
 WAL_LIB=github.com/wal-g/$(WAL_LIB_NAME)
 WAL_LIB_UPSTREAM=github.com/wal-g/$(WAL_LIB_NAME)
 WAL_LIB_FSPATH=$(GOPATH)/src/$(WAL_LIB)
+
+# https://github.com/moiot/gravity
+GRA_LIB_NAME=gravity
+GRA_LIB_BRANCH=master
+GRA_LIB_TAG=v1.0.0
+GRA_LIB=github.com/moiot/$(GRA_LIB_NAME)
+GRA_LIB_UPSTREAM=github.com/moiot/$(GRA_LIB_NAME)
+GRA_LIB_FSPATH=$(GOPATH)/src/$(GRA_LIB)
+
 
 
 
@@ -22,6 +36,14 @@ help:  ## Display this help
 print: ### print
 
 	@echo 	
+	@echo USQL_LIB_NAME :      $(USQL_LIB_NAME)
+	@echo USQL_LIB_BRANCH :    $(USQL_LIB_BRANCH)
+	@echo USQL_LIB_TAG :       $(USQL_LIB_TAG)
+	@echo USQL_LIB :           $(USQL_LIB)
+	@echo USQL_LIB_FSPATH  :   $(USQL_LIB_FSPATH)
+	@echo 
+
+	@echo 	
 	@echo WAL_LIB_NAME :      $(WAL_LIB_NAME)
 	@echo WAL_LIB_BRANCH :    $(WAL_LIB_BRANCH)
 	@echo WAL_LIB_TAG :       $(WAL_LIB_TAG)
@@ -30,25 +52,84 @@ print: ### print
 	@echo 
 
 
+	@echo 	
+	@echo GRA_LIB_NAME :      $(GRA_LIB_NAME)
+	@echo GRA_LIB_BRANCH :    $(GRA_LIB_BRANCH)
+	@echo GRA_LIB_TAG :       $(GRA_LIB_TAG)
+	@echo GRA_LIB :           $(GRA_LIB)
+	@echo GRA_LIB_FSPATH  :   $(GRA_LIB_FSPATH)
+	@echo 
+
+
 	@echo 
 
 git-clone: ### git-clone
 
-	# benthos
+	# usql
+	mkdir -p $(USQL_LIB_FSPATH)
+	cd $(USQL_LIB_FSPATH) && cd .. && rm -rf $(USQL_LIB_NAME) && git clone ssh://git@$(USQL_LIB).git
+	cd $(USQL_LIB_FSPATH) && git fetch --all --tags --prune
+	#cd $(USQL_LIB_FSPATH) && git checkout tags/$(USQL_LIB_TAG)
+
+	# walg
 	mkdir -p $(WAL_LIB_FSPATH)
 	cd $(WAL_LIB_FSPATH) && cd .. && rm -rf $(WAL_LIB_NAME) && git clone ssh://git@$(WAL_LIB).git
 	cd $(WAL_LIB_FSPATH) && git fetch --all --tags --prune
 	#cd $(WAL_LIB_FSPATH) && git checkout tags/$(WAL_LIB_TAG)
 
+	# gravity
+	mkdir -p $(GRA_LIB_FSPATH)
+	cd $(GRA_LIB_FSPATH) && cd .. && rm -rf $(GRA_LIB_NAME) && git clone ssh://git@$(GRA_LIB).git
+	cd $(GRA_LIB_FSPATH) && git fetch --all --tags --prune
+	#cd $(GRA_LIB_FSPATH) && git checkout tags/$(GRA_LIB_TAG)
 	
 
 git-clean: ### git-clean
-	#rm -rf $(BEP_LIB_FSPATH)
+	rm -rf $(WAL_LIB_FSPATH)
+	rm -rf $(GRA_LIB_FSPATH)
+
+dep-os: ### dep-os
+
+	# THis installed the databases we need quickyly. Dont want to sue Docker because want to support Desktops too.
+	# Mac for now because life is too short. Will get multi OS later.
+	# All of these have equivalents in Scoop, so easy to do later.
+	# E.G: https://github.com/xo/usql#installing-via-scoop-windows
 
 
+	# postgresql
+	brew install postgresql
+	brew services start postgresql
+	brew services stop postgresql
+
+	# mysql
+	brew install mysql
+	brew services start mysql
+	brew services stop mysql
+
+	# oracle
+	# Must be manually downloaded first. Freaking Oracle !!
+	# https://vanwollingen.nl/install-oracle-instant-client-and-sqlplus-using-homebrew-a233ce224bf
+	# This includes the Data Pump tools needed for CDC :)
+	brew tap InstantClientTap/instantclient
+	brew install instantclient-basic
+	brew install instantclient-sqlplus
+
+
+dep-os-list: ### deo-os-list
+	# whats running ? works great
+	brew services list
+
+
+dep-modules:
+	
+
+	# https://github.com/elves
+	# Looks like its made to do Pipelines from the Terminal in a Cross platform way.
+	# Miht be a nice match for Benthos.
+	#go get github.com/elves/elvish
 
 code-open: ### code-open
-	code $(WAL_LIB_FSPATH)
+	code code.code-workspace
 
 ### Gateway
 
@@ -71,26 +152,31 @@ gate-run: ### gate-run
 	#$(PWD)/bin/ngrok http 8000
 	$(PWD)/bin/ngrok http -subdomain=gedw99 $(GATE_PORT)
 
+### USQL
+
+usql-build:
+	cd $(USQL_LIB_FSPATH) && GO111MODULE=on go build .
+	cp $(GOPATH)/src/github.com/xo/usql/usql $(GOPATH)/bin
+	
+run:
+	usql -h
+
+### GRA 
+
+GRA_BIN=grabs
+
+gra-dep:	
+	# grabs dep
+	cd $(GRA_LIB_FSPATH) && make install
+
+	# gets all deps.
+	cd $(GRA_LIB_FSPATH) && make deps
+	
+
 
 ### WAL
 
 WAL_BIN=wal
-
-
-wal-dep-os:
-	# postgresql
-	brew install postgresql
-	brew services start postgresql
-	brew services stop postgresql
-
-	# mysql
-	brew install mysql
-	brew services start mysql
-	brew services stop mysql
-
-wal-dep-os-list:
-	# whats running ? works great
-	brew services list
 
 wal-dep:	
 	# grabs dep
@@ -111,7 +197,6 @@ wal-build: ### wal-build
 	mkdir -p $(PWD)/bin
 	cp $(GOPATH)/bin/wal-g $(PWD)/bin/$(WAL_BIN)-my
 	
-
 wal-run: ### wal-run
 	$(PWD)/bin/$(WAL_BIN) 
 

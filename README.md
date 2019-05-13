@@ -21,3 +21,11 @@ See the Architecture Doc for more indepth info on the theory.
 1. Write a CLi for pushing content into mySQL and Postresql, so we can use as a Test harness
 
 2. Write a CLI for watching the messages hitting Minio and then goin into NATS topic.
+
+
+## bits of bobs
+
+SQLite WAL
+https://github.com/CovenantSQL/CovenantSQL/blob/develop/xenomint/sqlite/sqlite.go
+- shows how to do CDC with sqlite
+
