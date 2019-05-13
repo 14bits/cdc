@@ -7,7 +7,7 @@ This is for CQRS style architecture.
 The basic theory:
 
 The DB is the write side and we "watch" for changes to them and feed the CUD ( Create, Update, Delete) events into NATS.
-Once you have this is very powerful pattern because you can keep all other GUI's and MicroServices up to Date since they subscribe ot the Changes.
+Once you have this in place it is a very powerful pattern because you can keep all other GUI's and MicroServices up to Date since they subscribe to the Changes.
 
 We use this library:
 https://github.com/wal-g/wal-g
