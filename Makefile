@@ -103,6 +103,7 @@ dep-os: ### dep-os
 
 	# mysql
 	brew install mysql
+	brew install mysql-client
 	brew services start mysql
 	brew services stop mysql
 
@@ -154,34 +155,41 @@ gate-run: ### gate-run
 
 ### USQL
 
-usql-build:
+usql-build: ### usql-build:
 	cd $(USQL_LIB_FSPATH) && GO111MODULE=on go build .
 	cp $(GOPATH)/src/github.com/xo/usql/usql $(GOPATH)/bin
 	
-run:
-	usql -h
+usql-run: ### usql-run
+	# connect to mysql
+	usql mysql://user:pass@host:port/dbname
 
 ### GRA 
 
 GRA_BIN=gra
-
-gra-dep:	
-	# grabs dep
-	cd $(GRA_LIB_FSPATH) && make install
-
-	# gets all deps.
-	cd $(GRA_LIB_FSPATH) && make deps
 	
 gra-build: ### gra-build
+	# uses gomodules for dep
+
 	cd $(GRA_LIB_FSPATH) && GO111MODULE=on make build
 	mkdir -p $(PWD)/bin
 	cp $(GRA_LIB_FSPATH)/bin/$(GRA_LIB_NAME) $(PWD)/bin/$(GRA_BIN)
 
+	# copy config
+	cp $(PWD)/mysql2mysql.toml $(PWD)/bin/mysql2mysql.toml
+
 gra-run: ### gra-run
-	$(PWD)/bin/$(GRA_BIN) -h
+	# start mysql server
+	brew services start mysql
+
+	$(PWD)/bin/$(GRA_BIN) -config mysql2mysql.toml
+
+
+
 ### WAL
 
 WAL_BIN=wal
+WAL_BIN_POST=$(WAL_BIN)-post
+WAL_BIN_MYSQ=$(WAL_BIN)-mysq
 
 wal-dep:	
 	# grabs dep
@@ -191,19 +199,22 @@ wal-dep:
 	cd $(WAL_LIB_FSPATH) && make deps
 	
 
-wal-build: ### wal-build
+wal-build: wal-dep ### wal-build
+	# uses dep for deps.
+
 	# pg
 	cd $(WAL_LIB_FSPATH) && GOBIN=$(GOPATH)/bin make pg_install
 	mkdir -p $(PWD)/bin
-	cp $(GOPATH)/bin/wal-g $(PWD)/bin/$(WAL_BIN)-pg
+	cp $(GOPATH)/bin/wal-g $(PWD)/bin/$(WAL_BIN_POST)
 
 	# mysql
 	cd $(WAL_LIB_FSPATH) && GOBIN=$(GOPATH)/bin make mysql_install
 	mkdir -p $(PWD)/bin
-	cp $(GOPATH)/bin/wal-g $(PWD)/bin/$(WAL_BIN)-my
+	cp $(GOPATH)/bin/wal-g $(PWD)/bin/$(WAL_BIN_MYSQ)
 	
 wal-run: ### wal-run
-	$(PWD)/bin/$(WAL_BIN) 
+	# postresql is easy...
+	$(PWD)/bin/$(WAL_BIN_POST)-pg -h
 
 
 

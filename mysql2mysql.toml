@@ -1,0 +1,34 @@
+# name (required)
+name = "mysql2mysqlDemo"
+version = "1.0"
+#
+# The definition of Input. `mysqlbinlog` is used for this definition.
+#
+[input]
+type = "mysql"
+mode = "stream"
+[input.config.source]
+host = "127.0.0.1"
+username = "root"
+password = ""
+port = 3306
+location = "Local"
+
+#
+# The definition of Output. `mysql` is used for this definition.
+#
+[output]
+type = "mysql"
+[output.config.target]
+host = "127.0.0.1"
+username = "root"
+password = ""
+port = 3306
+location = "Local"
+
+# The definition of the routing rule
+[[output.config.routes]]
+match-schema = "test"
+match-table = "test_source_table"
+target-schema = "test"
+target-table = "test_target_table"
